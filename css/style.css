@@ -1,0 +1,430 @@
+/* --- Variáveis de Cor e Fontes --- */
+:root {
+    --bg-color: #0f172a; /* Azul escuro ardósia */
+    --container-bg: #1e293b; /* Azul ardósia mais claro */
+    --border-color: #334155;
+    --text-color: #e2e8f0; /* Cinza claro */
+    --primary-color: #22d3ee; /* Ciano brilhante */
+    --secondary-color: #f87171; /* Vermelho claro (para erros/destruição) */
+    --success-color: #4ade80; /* Verde brilhante */
+    --font-primary: 'Poppins', sans-serif;
+    --font-mono: 'Roboto Mono', monospace;
+}
+
+/* --- Reset Básico e Estilos Globais --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-primary);
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- Container do Jogo --- */
+#game-container {
+    width: 600px; /* Um pouco maior */
+    height: 700px;
+    background: linear-gradient(rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.9)),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23334155' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E"); /* Fundo com padrão sutil */
+    border: 1px solid var(--border-color);
+    border-radius: 10px; /* Cantos arredondados */
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* --- Elementos do Jogo --- */
+#player {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--primary-color); /* Usa a cor primária */
+    transition: transform 0.2s ease-out;
+}
+#player svg {
+    filter: drop-shadow(0 0 5px var(--primary-color));
+}
+
+#enemies-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.enemy {
+    position: absolute;
+    background: linear-gradient(145deg, #334155, #293548); /* Gradiente sutil */
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 6px;
+    text-align: center;
+    transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+}
+/* Estilo para o alvo ativo */
+.enemy.active-target {
+     border-color: var(--primary-color);
+     box-shadow: 0 0 12px 2px var(--primary-color);
+}
+
+
+.enemy-word {
+    font-family: var(--font-mono); /* Fonte monoespaçada para palavras */
+    font-size: 1.2em;
+    white-space: nowrap;
+    letter-spacing: 1.5px; /* Mais espaçado */
+    display: flex; /* Para alinhar spans */
+    gap: 1px;
+}
+
+.enemy-word span {
+    transition: color 0.2s ease, transform 0.2s ease;
+    display: inline-block; /* Para permitir transform */
+}
+
+/* Feedback de digitação */
+.correct-char {
+    color: var(--success-color);
+    transform: scale(1.1); /* Leve aumento */
+}
+
+.incorrect-char {
+    color: var(--secondary-color);
+    text-decoration: wavy underline var(--secondary-color); /* Sublinhado ondulado */
+}
+/* Próximo caractere a ser digitado */
+.next-char {
+    border-bottom: 2px solid var(--primary-color);
+    animation: blink-next 1s infinite;
+}
+@keyframes blink-next {
+    50% { border-bottom-color: transparent; }
+}
+
+
+/* --- Input de Digitação --- */
+#typing-input {
+    padding: 12px 15px;
+    font-size: 1.3em;
+    font-family: var(--font-mono);
+    width: 580px; /* Ligeiramente menor que o container */
+    text-align: center;
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#typing-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.5); /* Sombra ciano suave */
+}
+
+#typing-input:disabled {
+    background-color: #2a3a50; /* Um pouco mais escuro quando desabilitado */
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* --- Placar e Mensagens --- */
+#game-info { /* NOVO container */
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    right: 15px; /* Ocupa a largura */
+    display: flex;
+    justify-content: space-between; /* Espaça os itens */
+    align-items: center;
+    background-color: rgba(30, 41, 59, 0.7);
+    padding: 5px 10px;
+    border-radius: 5px;
+    z-index: 10; /* Abaixo dos menus */
+}
+
+#score-board {
+    /* Removido position, top, left. Estilos internos mantidos */
+    font-size: 1.3em;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    /* Removido background, padding, radius - agora em #game-info */
+}
+#score {
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-left: 5px;
+    min-width: 30px;
+    display: inline-block;
+    text-align: right;
+    transition: transform 0.15s ease-out; /* Mantém efeito de score */
+}
+
+#user-display { /* NOVO */
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    font-size: 1.1em;
+}
+#user-display svg {
+    margin-right: 6px;
+    color: var(--primary-color);
+    opacity: 0.8;
+}
+#display-username {
+    font-weight: bold;
+}
+
+#message-board {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.8em; /* Um pouco menor */
+    color: var(--primary-color);
+    background-color: rgba(15, 23, 42, 0.9); /* Fundo mais opaco */
+    padding: 30px 40px;
+    border-radius: 10px;
+    display: none; /* Controlado por JS */
+    opacity: 0; /* Controlado por JS */
+    text-align: center;
+    z-index: 30;
+    transition: opacity 0.3s ease-in-out;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 5px 15px rgba(34, 211, 238, 0.2);
+}
+#message-board.active {
+    display: block;
+    opacity: 1;
+}
+
+
+/* --- Menus Overlay --- */
+.menu-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.95); /* Quase opaco */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 20;
+    color: var(--text-color);
+    opacity: 0; /* Começa invisível */
+    visibility: hidden; /* Começa inacessível */
+    transition: opacity 0.4s ease-in-out, visibility 0.4s ease-in-out;
+}
+.menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.menu-overlay h1 {
+    font-size: 3em;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+.input-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    max-width: 300px;
+}
+.input-group label {
+    font-size: 1em;
+    margin-bottom: 8px;
+    color: var(--primary-color);
+}
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1.1em;
+    font-family: var(--font-primary);
+    background-color: var(--container-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 6px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.input-group input[type="text"]:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(34, 211, 238, 0.5);
+}
+#start-username-display { /* Span dentro do botão start */
+    font-weight: normal;
+    margin-left: 5px;
+    font-style: italic;
+}
+.error-message { /* NOVO */
+    color: var(--secondary-color);
+    font-size: 0.9em;
+    margin-top: -10px; /* Puxa para mais perto do botão */
+    margin-bottom: 15px;
+    height: 1.2em; /* Garante espaço mesmo vazio */
+    visibility: hidden; /* Esconde por padrão */
+}
+.error-message.visible {
+    visibility: visible;
+}
+
+
+.neo-text {
+    color: var(--primary-color);
+    font-weight: 700;
+}
+
+.menu-overlay h2 {
+    font-size: 2.5em;
+    margin-bottom: 25px;
+    color: var(--primary-color);
+}
+
+.menu-overlay p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    max-width: 85%;
+    line-height: 1.6;
+}
+
+.pause-instructions {
+    margin-top: 20px;
+    font-size: 1em;
+    color: #94a3b8; /* Cinza mais claro */
+}
+
+/* --- Botões --- */
+.btn {
+    padding: 12px 30px;
+    font-size: 1.2em;
+    font-family: var(--font-primary);
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    border-radius: 30px; /* Mais arredondado */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    display: inline-flex; /* Para alinhar ícone e texto */
+    align-items: center;
+    gap: 8px; /* Espaço entre ícone e texto */
+    text-decoration: none;
+    color: var(--bg-color); /* Texto escuro para contraste */
+}
+.btn-primary {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 10px rgba(34, 211, 238, 0.3);
+}
+.btn-primary:hover {
+    background-color: #67e8f9; /* Ciano mais claro */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(34, 211, 238, 0.4);
+}
+.btn-secondary {
+     background-color: var(--success-color); /* Verde para continuar */
+     box-shadow: 0 4px 10px rgba(74, 222, 128, 0.3);
+     color: var(--bg-color);
+}
+.btn-secondary:hover {
+     background-color: #86efac; /* Verde mais claro */
+     transform: translateY(-2px);
+     box-shadow: 0 6px 15px rgba(74, 222, 128, 0.4);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 1em;
+    padding: 5px;
+    /* margin-left removido, pois space-between cuida */
+    cursor: pointer;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    transition: background-color 0.2s, color 0.2s;
+}
+.btn-icon:hover {
+    background-color: var(--border-color);
+    color: var(--primary-color);
+}
+.btn svg {
+    vertical-align: middle;
+}
+
+
+/* --- Animação de Explosão --- */
+.explosion {
+    animation: modern-explode 0.4s ease-out forwards;
+    /* Não removemos o background aqui, deixamos a animação fazer */
+}
+
+@keyframes modern-explode {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+        background: radial-gradient(circle, var(--secondary-color) 0%, var(--primary-color) 70%, transparent 100%);
+        filter: blur(0px);
+        box-shadow: 0 0 15px 5px var(--secondary-color);
+    }
+    50% {
+        transform: scale(1.3);
+        opacity: 0.8;
+        filter: blur(2px);
+    }
+    100% {
+        transform: scale(1.6);
+        opacity: 0;
+        background: radial-gradient(circle, var(--secondary-color) 0%, var(--primary-color) 70%, transparent 100%);
+        filter: blur(5px);
+         box-shadow: 0 0 30px 10px var(--secondary-color);
+    }
+}
+
+/* --- NOVO: Estilo do Projétil --- */
+.projectile {
+    position: absolute; /* Posicionado dentro do game-container */
+    width: 5px;       /* Largura do "laser" */
+    height: 15px;      /* Altura/comprimento do "laser" */
+    background-color: var(--primary-color); /* Cor ciano brilhante */
+    border-radius: 3px; /* Bordas levemente arredondadas */
+    box-shadow: 0 0 8px var(--primary-color), 0 0 4px white inset; /* Brilho */
+    z-index: 5;        /* Fica acima do fundo, mas abaixo dos inimigos/menus */
+    pointer-events: none; /* Não interfere com cliques */
+
+    /* Transição para animar o movimento */
+    /* A duração deve ser curta para parecer um tiro rápido */
+    transition: top 0.12s linear, left 0.12s linear;
+}
+
+/* Classe opcional para quando o inimigo está congelado no game over */
+.frozen {
+    filter: grayscale(80%);
+    opacity: 0.6;
+}
